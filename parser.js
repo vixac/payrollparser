@@ -2,7 +2,6 @@ var readline = require('readline');
 
 var print = console.log;
 
-var processedPeople = [];
 var currentPerson = emptyPerson();
 var STATES = [  createIdState(),
     createDateState(),
@@ -134,10 +133,8 @@ function addCompletedPersion() {
 		firstPass = false ;
 		return ;
 	}
-	processedPeople.push(currentPerson);
-	print("Completed person:");
-	printRow(currentPerson);
-	print(currentPerson);
+	var row = getRow(currentPerson);
+	print(row);
 	currentPerson = emptyPerson();
 }
 //read a single line of stdin
@@ -149,13 +146,29 @@ function quote(string) {
 function comma(string) {
 	return string + ",";
 }
-function printRow(currentPerson) {
+
+function getId(string) {
+	var firstSpaceIndex = string.indexOf("\t");
+	return string.substring(0,firstSpaceIndex);
+}
+
+function getName(string) {
+	var firstSpaceIndex = string.indexOf(" ");
+	return parseTabs(string.substring(firstSpaceIndex)).string;
+}
+function getRow(currentPerson) {
 	var row = "";
-	row = quote(currentPerson.idString);
-	row = comma(row);
-	row = quote(currentPerson.dateString);
-	row = comma(row);
-	row = quote(currentPerson.processingString);
+	var comma = ",";
+
+print("ID IS" + currentPerson.idString);
+	var id = getId(currentPerson.idString);
+	var name = getName(currentPerson.idString);
+	row += quote(id);
+	row += comma;
+	row += quote()
+	row += quote(currentPerson.dateString);
+	row += comma;
+	row += quote(currentPerson.processingString);
 	return row;
 }
 
@@ -163,11 +176,10 @@ function printRow(currentPerson) {
 function processLine(line) {
     var s = currentPerson.state;
     var next = nextBeginIndex();
-    if(STATES[next].isBegun(line)) {
+    if(STATES[next].isBegun(line)) { //VXTODO this is wrong. first and second entities are getting scrambled.
 		if(s === 0) {
     		addCompletedPersion();
     	}	
-
    		currentPerson.state = next;  
    		var output = STATES[next].extract(line);
    		append(output);
@@ -180,6 +192,7 @@ function processLine(line) {
     	process.exit();
     }
 }
+
 function endOfContent(line) {
 	return line.indexOf("Processing at End of Selection") !== -1;
 }
