@@ -1,3 +1,4 @@
+//http://rextester.com/l/nodejs_online_compiler
 var readline = require('readline');
 
 var print = console.log;
@@ -23,9 +24,6 @@ function createState(isBegun, extract) {
 		extract: extract 
 	};
 }
-
-
-
 
 /* returns 
 a string without the prefixed tabs
