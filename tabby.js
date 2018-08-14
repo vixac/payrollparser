@@ -1,6 +1,7 @@
 var readline = require('readline');
 var process = require('process');
 var out = console.log;
+var fs = require('fs');
 var Block = /** @class */ (function () {
     function Block(lines) {
         this.errors = "";
@@ -145,9 +146,14 @@ function tabsLinesToBlocks(tabLines) {
     blocks.push(newBlock);
     return blocks;
 }
+function getCSVTitle() {
+    return "Id, Name, Date, Errors";
+}
+//VXTODO RM
 function printTitleCSVStyle() {
     out("Id, Name, Date, Errors");
 }
+//VXTODO RM
 function printBlockCSVStyle(b) {
     //for(var i=0, l = b.length; i<l; i++) {
     //    out(`lineType => ${LineType[b.lines[i].linetype]}: "${b.lines[i].cleanLine}"`);
@@ -155,6 +161,10 @@ function printBlockCSVStyle(b) {
     //out(`Block: ID:"${b.id}", name:"${b.name}", date:"${b.date}",errors: "${b.errors}"`)
     out(b.id + ", " + b.name + ", " + b.date + ", " + b.errors);
 }
+function CSVStyle(b) {
+    return b.id + ", " + b.name + ", " + b.date + ", " + b.errors;
+}
+//VXTODO RM
 function parseDocument(lines) {
     //out(`parsing ${lines.length} lines`);
     var tabLines = trimJunk(lines);
@@ -164,6 +174,17 @@ function parseDocument(lines) {
         var b = blocks[i];
         printBlockCSVStyle(b);
     }
+}
+function parse(lines) {
+    var tabLines = trimJunk(lines);
+    var blocks = tabsLinesToBlocks(tabLines);
+    var output = [];
+    output.push(getCSVTitle());
+    for (var i = 0, l = blocks.length; i < l; i++) {
+        var b = blocks[i];
+        output.push(CSVStyle(b));
+    }
+    return output;
 }
 function runFromStdIn() {
     var lines = [];
@@ -180,4 +201,36 @@ function runFromStdIn() {
         process.exit();
     }, 500);
 }
-runFromStdIn();
+function runWithInputFile(fileName, outputFileName) {
+    fs.readFile(fileName, 'utf8', function (err, data) {
+        if (err) {
+            out("Oops! Tabby couldn't open " + fileName + ". Heres why: \n " + err);
+            return;
+        }
+        out("Reading file ...");
+        var lines = data.split('\n');
+        out(fileName + " is  " + lines.length + " lines long.");
+        var output = parse(lines);
+        out("Tabby has finished reading '" + fileName + "'. Produced " + output.length + " rows.");
+        var outputString = "";
+        for (var i = 0, l = output.length; i < l; i++) {
+            outputString += output[i] + "\n";
+        }
+        fs.writeFile(outputFileName, outputString, function (err) {
+            if (err) {
+                out("Error saving output: " + err);
+            }
+            else {
+                out("Output saved in " + outputFileName);
+            }
+        });
+    });
+}
+function main() {
+    out("Tabby is starting..........................");
+    var fileName = process.argv[2] || "files/input.txt";
+    var outputFileName = process.argv[3] || "files/output.csv";
+    out("Looking for input file named '" + fileName + "'");
+    runWithInputFile(fileName, outputFileName);
+}
+main();

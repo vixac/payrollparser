@@ -2,6 +2,7 @@ declare function require(name:string): any;
 var readline = require('readline');
 var process = require('process');
 var out = console.log;
+var fs = require('fs')
 
 class  Block {
     public id:string
@@ -169,9 +170,17 @@ function tabsLinesToBlocks(tabLines:TabLine[]): Block[] {
     return blocks
 }
 
+function getCSVTitle(): string {
+    return "Id, Name, Date, Errors"; 
+}
+
+
+//VXTODO RM
 function printTitleCSVStyle() {
     out(`Id, Name, Date, Errors`);
 }
+
+//VXTODO RM
 function printBlockCSVStyle(b: Block) {
     //for(var i=0, l = b.length; i<l; i++) {
     //    out(`lineType => ${LineType[b.lines[i].linetype]}: "${b.lines[i].cleanLine}"`);
@@ -180,6 +189,12 @@ function printBlockCSVStyle(b: Block) {
     //out(`Block: ID:"${b.id}", name:"${b.name}", date:"${b.date}",errors: "${b.errors}"`)
     out(`${b.id}, ${b.name}, ${b.date}, ${b.errors}`)
 }
+
+function CSVStyle(b: Block): string {
+    return `${b.id}, ${b.name}, ${b.date}, ${b.errors}`;
+}
+
+//VXTODO RM
 function parseDocument(lines: string[]): void { 
     //out(`parsing ${lines.length} lines`);
     var tabLines = trimJunk(lines);
@@ -189,6 +204,17 @@ function parseDocument(lines: string[]): void {
         var b = blocks[i];
         printBlockCSVStyle(b);
     }
+}
+function parse(lines: string[]): string[] {
+    var tabLines = trimJunk(lines);
+    var blocks = tabsLinesToBlocks(tabLines);
+    var output: string[] = []
+    output.push(getCSVTitle());
+    for(var i = 0, l = blocks.length ; i < l; i++) {
+        var b = blocks[i];
+        output.push(CSVStyle(b))
+    }
+    return output
 }
 
 function runFromStdIn(): void {
@@ -208,4 +234,40 @@ function runFromStdIn(): void {
         process.exit();
     }, 500);
 }
-runFromStdIn();
+
+function runWithInputFile(fileName: string, outputFileName: string): void {
+  fs.readFile(fileName, 'utf8', function(err, data) {
+    if (err) { 
+        out(`Oops! Tabby couldn't open ${fileName}. Heres why: \n ${err}`)
+        return 
+    }
+    out(`Reading file ...`);
+    var lines: string[] = data.split('\n');
+    out(`${fileName} is  ${lines.length} lines long.`);
+    var output = parse(lines);
+    out(`Tabby has finished reading '${fileName}'. Produced ${output.length} rows.`)
+    var outputString = ""
+    for(var i = 0, l = output.length ; i < l; i++) {
+        outputString += output[i] + "\n";
+    }
+    fs.writeFile(outputFileName, outputString, function(err){ 
+        if(err) {
+            out(`Error saving output: ${err}`)
+        }
+        else {
+            out(`Output saved in ${outputFileName}`)
+        }
+    });
+  });
+}
+
+function main():void {
+    out(`Tabby is starting..........................`)
+    var fileName: string = process.argv[2] || "files/input.txt";
+    var outputFileName: string = process.argv[3] || "files/output.csv";
+    out(`Looking for input file named '${fileName}'`)
+    runWithInputFile(fileName, outputFileName);
+}
+
+main();
+
