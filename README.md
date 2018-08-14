@@ -1,10 +1,11 @@
 This is a simple parser of the tabbed output of the Payroll system in question.
-Heres how you use it:
+Requirements:
+- node.js
+- tsc
 
-- run "tsc payroll.ts" to generate payroll.js
-- copy payroll.js  into http://rextester.com/l/nodejs_online_compiler
-- copy your payroll output tabbed text into the Input section on the website, (just above the Run It button).
-- Press Run it.
-- The output is CSV text. Copy it and paste it into a new file with the .csv extension.
-- Open your new file in excel
+How to use:
+- run build.sh to create tabby.js from typescript/tabby.ts
+- move your input tabbed file into files/input.txt
+- run run.sh
+- your output file
 - Thank Alan Turing for both creating the cause and the solution to all your problems.

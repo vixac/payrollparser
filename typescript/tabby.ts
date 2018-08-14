@@ -205,6 +205,7 @@ function parseDocument(lines: string[]): void {
         printBlockCSVStyle(b);
     }
 }
+
 function parse(lines: string[]): string[] {
     var tabLines = trimJunk(lines);
     var blocks = tabsLinesToBlocks(tabLines);
@@ -243,9 +244,10 @@ function runWithInputFile(fileName: string, outputFileName: string): void {
     }
     out(`Reading file ...`);
     var lines: string[] = data.split('\n');
-    out(`${fileName} is  ${lines.length} lines long.`);
+    out(`${fileName} is ${lines.length} lines long.`);
     var output = parse(lines);
-    out(`Tabby has finished reading '${fileName}'. Produced ${output.length} rows.`)
+    
+    out(`Tabby has finished reading '${fileName}`)
     var outputString = ""
     for(var i = 0, l = output.length ; i < l; i++) {
         outputString += output[i] + "\n";
@@ -255,14 +257,15 @@ function runWithInputFile(fileName: string, outputFileName: string): void {
             out(`Error saving output: ${err}`)
         }
         else {
-            out(`Output saved in ${outputFileName}`)
+            out(`${output.length} rows created. Output saved in '${outputFileName}'`)
+            out(`Tabby is finished..............................`)
         }
     });
   });
 }
 
 function main():void {
-    out(`Tabby is starting..........................`)
+    out(`Tabby is starting.............................`)
     var fileName: string = process.argv[2] || "files/input.txt";
     var outputFileName: string = process.argv[3] || "files/output.csv";
     out(`Looking for input file named '${fileName}'`)
